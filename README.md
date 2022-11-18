@@ -1,3 +1,5 @@
+![](./icon.png)
+
 ## Split Pane View Helper
 
 Simple [Obsidian][1] plugin that adds a couple of configurable hotkeys and a toolbar button to quickly open a vertical or horizontal split view. The original pane is placed into 'source' mode and the new pane in 'preview' mode.
