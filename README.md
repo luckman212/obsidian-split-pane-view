@@ -1,4 +1,4 @@
-![](./icon.png)
+<img src="https://raw.githubusercontent.com/luckman212/obsidian-split-pane-view/main/icon.png">
 
 ## Split Pane View Helper
 
@@ -10,8 +10,7 @@ Also provides an assignable "close other panes" hotkey which will close all othe
 
 Ideas borrowed from all around the web, Obsidian Discord channel, and other plugin authors who came before me. Thank you all.
 
-Related forum link:
-
-https://forum.obsidian.md/t/viewing-note-in-side-by-side-mode-how-to-create-a-new-note-and-have-it-replace-the-current-view-instead-of-opening-a-new-tab
+[Related forum link][2]
 
 [1]: https://obsidian.md/
+[2]: https://forum.obsidian.md/t/viewing-note-in-side-by-side-mode-how-to-create-a-new-note-and-have-it-replace-the-current-view-instead-of-opening-a-new-tab
