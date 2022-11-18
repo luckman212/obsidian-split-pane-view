@@ -1,24 +1,24 @@
 // inspired by: https://forum.obsidian.md/t/viewing-note-in-side-by-side-mode-how-to-create-a-new-note-and-have-it-replace-the-current-view-instead-of-opening-a-new-tab
+// v1.0.2
 
 import {
 	App,
-	WorkspaceLeaf,
 	TFile,
 	Notice,
 	SplitDirection,
 	Plugin,
 	PluginSettingTab,
-	Setting
+	Setting,
+	WorkspaceLeaf,
+	MarkdownView
 } from 'obsidian';
 
 declare module "obsidian" {
 	interface View {
 		file: TFile;
-		getMode: Function;
 	}
 	interface WorkspaceLeaf {
 		id: string;
-		group: string;
 	}
 }
 
@@ -32,7 +32,7 @@ const DEFAULT_SETTINGS: SplitViewPluginSettings = {
 	CLOSE_OTHER: true
 }
 
-export const getMarkdownLeaves = (): Array<WorkspaceLeaf> | null => app.workspace.getLeavesOfType('markdown') ?? null
+export const getMarkdownLeaves = (): WorkspaceLeaf[] => app.workspace.getLeavesOfType('markdown') ?? [];
 
 export default class SplitViewPlugin extends Plugin {
 	settings: SplitViewPluginSettings;
@@ -69,8 +69,8 @@ export default class SplitViewPlugin extends Plugin {
 				checkCallback: (checking: boolean) => {
 					if (getMarkdownLeaves()) {
 						if (!checking) {
-							let mrl = this.getMostRecentMDLeaf();
-							if (!!mrl) {
+							const mrl = this.getMostRecentMDLeaf();
+							if (mrl) {
 								this.closeOtherLeaves(mrl.id);
 							} else {
 								new Notice('Could not determine which pane(s) to close.');
@@ -96,8 +96,8 @@ export default class SplitViewPlugin extends Plugin {
 	}
 
 	getMostRecentMDLeaf(): WorkspaceLeaf | null {
-		const mrl: WorkspaceLeaf | null = this.app.workspace.getMostRecentLeaf();
-		if (!!mrl && mrl.view.getViewType() === 'markdown') {
+		const mrl = this.app.workspace.getMostRecentLeaf();
+		if (mrl && mrl.view.getViewType() === 'markdown') {
 			return mrl;
 		} else {
 			return null;
@@ -105,33 +105,40 @@ export default class SplitViewPlugin extends Plugin {
 	}
 
 
-	async closeOtherLeaves(id: string): Promise<void> {
-		if (!id) return;
+	async closeOtherLeaves(primary_leaf_id: string): Promise<void> {
+		if (!primary_leaf_id) return;
 		this.app.workspace.detachLeavesOfType('empty');
-		this.app.workspace.getLeavesOfType('markdown').forEach((leaf: WorkspaceLeaf) => { //leaf: WorkspaceLeaf & { id: string }
-			if (leaf.id !== id) {
+		this.app.workspace.getLeavesOfType('markdown').forEach((leaf: WorkspaceLeaf) => {
+			if (leaf.id !== primary_leaf_id) {
 				//console.log('closing non-primary leaf: %s', leaf.view.file.basename);
-				leaf.detach();
+				leaf.detach?.();
 			}
 		});
 	}
 
 	async openSplitPaneView() {
 		const srcLeaf: WorkspaceLeaf | null = this.getMostRecentMDLeaf();
-		if (!srcLeaf) {
+		const srcView = <MarkdownView>srcLeaf?.view ?? null;
+		if (!srcLeaf || !srcView) {
+			new Notice('Could not determine active pane!');
+			return;
+		}
+		const srcFile = <TFile>srcLeaf?.view.file ?? null;
+		if (!srcFile) {
 			new Notice('Could not determine active file!');
 			return;
 		}
+
 		if (this.settings.CLOSE_OTHER) { //close empty & non-primary leaves
 			this.closeOtherLeaves(srcLeaf.id);
 		}
-		const srcFile: TFile = srcLeaf?.view.file;
+
 		//const newLeaf = this.app.workspace.createLeafBySplit(srcLeaf, this.settings.DIRECTION, false);
 		const newLeaf = this.app.workspace.getLeaf('split', this.settings.DIRECTION);
 		await newLeaf.openFile(srcFile, { state: { mode: 'preview', active: true, focus: false } });
-		if (srcLeaf.view.getMode() === 'preview') {
-			await srcLeaf.view.setState({
-				...srcLeaf.view.getState(),
+		if (srcView.getMode() === 'preview') {
+			await srcView.setState({
+				...srcView.getState(),
 				mode: 'source'
 			}, {});
 		}
@@ -149,7 +156,7 @@ class SplitViewPluginSettingsTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		let { containerEl } = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 		containerEl.createEl("h2", { text: "Split Pane View Helper Settings" });
