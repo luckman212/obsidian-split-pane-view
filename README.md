@@ -1,0 +1,1 @@
+# obsidian-split-pane-view
