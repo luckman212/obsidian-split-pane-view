@@ -38,7 +38,7 @@ export default class SplitViewPlugin extends Plugin {
 	settings: SplitViewPluginSettings;
 
 	async onload() {
-		console.log('loading %s plugin', this.manifest.name);
+		console.log(`loading ${this.manifest.name} plugin ${this.manifest.version}`);
 		await this.loadSettings();
 
 		this.app.workspace.onLayoutReady(() => {
@@ -84,7 +84,7 @@ export default class SplitViewPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log('unloading %s plugin', this.manifest.name);
+		console.log(`unloading ${this.manifest.name} plugin`);
 	}
 
 	async loadSettings() {
@@ -110,7 +110,7 @@ export default class SplitViewPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType('empty');
 		this.app.workspace.getLeavesOfType('markdown').forEach((leaf: WorkspaceLeaf) => {
 			if (leaf.id !== primary_leaf_id) {
-				//console.log('closing non-primary leaf: %s', leaf.view.file.basename);
+				//console.log(`closing non-primary leaf: ${leaf.view.file.basename}`);
 				leaf.detach?.();
 			}
 		});
