@@ -1,5 +1,5 @@
 // inspired by: https://forum.obsidian.md/t/viewing-note-in-side-by-side-mode-how-to-create-a-new-note-and-have-it-replace-the-current-view-instead-of-opening-a-new-tab
-// v1.0.2
+// v1.0.3
 
 import {
 	App,
